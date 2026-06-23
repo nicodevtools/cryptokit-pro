@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoKit Pro — Free Crypto Tools by Nico</title>
+<meta name="description" content="Free crypto tools: Live Prices, DCA Simulator, P&L Calculator, Position Sizer, Portfolio Tracker. Built with ❤️ by Nico.">
+<style>
+:root {
+  --bg: #0a0e17;
+  --card: #111827;
+  --card2: #1a1f2e;
+  --border: #1e293b;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --accent3: #06b6d4;
+  --green: #10b981;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --transition: 0.2s ease;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(59,130,246,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(6,182,212,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width:1100px; margin:0 auto; padding:20px; position:relative; z-index:1; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+}
+.logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.badge {
+  font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 600;
+  background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3);
+}
+.live-dot {
+  width: 8px; height: 8px; background: var(--green); border-radius: 50%;
+  display: inline-block; animation: pulse 2s infinite; margin-right: 4px;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 4px; padding: 4px; background: var(--card);
+  border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px;
+  overflow-x: auto; flex-wrap: nowrap;
+}
+.tab {
+  padding: 10px 18px; border: none; background: transparent; color: var(--text2);
+  font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: var(--radius-sm);
+  white-space: nowrap; transition: var(--transition); font-family: inherit;
+}
+.tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.tab.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+/* Tab Content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards */
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px; margin-bottom: 16px;
+}
+.card h3 { font-size: 1.1rem; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.card h3 .icon { font-size: 1.3rem; }
+
+/* Price Grid */
+.price-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px;
+}
+.price-item {
+  background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px; cursor: pointer; transition: var(--transition); position: relative; overflow: hidden;
+}
+.price-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+.price-item .symbol { font-weight: 700; font-size: 0.9rem; }
+.price-item .name { font-size: 0.7rem; color: var(--text3); }
+.price-item .price { font-weight: 700; font-size: 1rem; margin-top: 4px; }
+.price-item .change { font-size: 0.75rem; font-weight: 600; margin-top: 2px; }
+.price-item .change.up { color: var(--green); }
+.price-item .change.down { color: var(--red); }
+
+/* Form Elements */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input, select {
+  width: 100%; padding: 10px 14px; background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit;
+  transition: var(--transition);
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+input::placeholder { color: var(--text3); }
+select { cursor: pointer; }
+
+/* Buttons */
+.btn {
+  padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: 0.9rem;
+  font-weight: 600; cursor: pointer; transition: var(--transition); font-family: inherit;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover { background: #059669; }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+.btn-block { width: 100%; }
+
+/* Results */
+.result-box {
+  background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 20px; margin-top: 16px;
+}
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.result-row:last-child { border-bottom: none; }
+.result-label { color: var(--text2); font-size: 0.85rem; }
+.result-value { font-weight: 700; font-size: 1.05rem; }
+.result-value.profit { color: var(--green); }
+.result-value.loss { color: var(--red); }
+.result-value.highlight { color: var(--accent3); font-size: 1.3rem; }
+
+/* Chart container */
+.chart-container {
+  width: 100%; height: 250px; margin-top: 16px; background: var(--card2);
+  border-radius: var(--radius-sm); overflow: hidden; position: relative;
+  border: 1px solid var(--border);
+}
+.chart-container canvas { width: 100%; height: 100%; }
+
+/* Donation Section */
+.donate-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1));
+  border: 1px solid rgba(139,92,246,0.3); border-radius: var(--radius);
+  padding: 28px; text-align: center;
+}
+.donate-card h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.donate-card p { color: var(--text2); margin-bottom: 20px; }
+.wallet-box {
+  background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.75rem;
+  word-break: break-all; color: var(--accent3); margin: 12px 0; position: relative;
+}
+.copy-btn {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: var(--accent); color: #fff; border: none; padding: 4px 12px;
+  border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-family: inherit;
+}
+.copy-btn:hover { background: #2563eb; }
+.networks {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px;
+}
+.network-tag {
+  font-size: 0.7rem; padding: 4px 10px; border-radius: 20px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text2);
+}
+.coffee-emoji { font-size: 3rem; margin-bottom: 12px; }
+
+/* Portfolio */
+.portfolio-coin {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px; background: var(--card2); border-radius: var(--radius-sm);
+  border: 1px solid var(--border); margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
+}
+.portfolio-coin .coin-info { display: flex; align-items: center; gap: 10px; }
+.portfolio-coin .coin-info .coin-symbol { font-weight: 700; }
+.portfolio-coin .coin-info .coin-amount { font-size: 0.8rem; color: var(--text2); }
+.portfolio-coin .coin-value { text-align: right; }
+.portfolio-coin .coin-value .usd { font-weight: 700; }
+.portfolio-coin .coin-value .pnl { font-size: 0.8rem; }
+.delete-btn {
+  background: none; border: none; color: var(--red); cursor: pointer;
+  font-size: 1.1rem; padding: 4px 8px; border-radius: 4px;
+}
+.delete-btn:hover { background: rgba(239,68,68,0.1); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff;
+  padding: 12px 24px; border-radius: var(--radius-sm); font-weight: 600;
+  z-index: 1000; animation: slideIn 0.3s ease, slideOut 0.3s ease 2s forwards;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+@keyframes slideIn { from { transform: translateX(100%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+@keyframes slideOut { from { transform: translateX(0); opacity:1 } to { transform: translateX(100%); opacity:0 } }
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: var(--text3); }
+.spinner {
+  width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Stats */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+.stat-item { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
+.stat-value { font-size: 1.3rem; font-weight: 700; }
+.stat-label { font-size: 0.7rem; color: var(--text3); margin-top: 4px; }
+
+/* Footer */
+.footer { text-align: center; padding: 24px; color: var(--text3); font-size: 0.8rem; }
+.footer a { color: var(--accent); text-decoration: none; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+  .price-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .tabs { gap: 2px; }
+  .tab { padding: 8px 12px; font-size: 0.75rem; }
+  .header { flex-direction: column; text-align: center; }
+}
+
+/* Tooltip */
+.tooltip { position: relative; }
+.tooltip::after {
+  content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  background: #1e293b; color: var(--text); padding: 4px 8px; border-radius: 4px;
+  font-size: 0.7rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.tooltip:hover::after { opacity: 1; }
+
+/* Slider style for DCA frequency */
+input[type="range"] {
+  -webkit-appearance: none; height: 6px; background: var(--border); border-radius: 3px; outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; background: var(--accent);
+  border-radius: 50%; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">🔧 CryptoKit Pro</div>
+    <div class="header-right">
+      <span class="badge"><span class="live-dot"></span>Live Prices</span>
+      <span class="badge" style="background:rgba(139,92,246,0.15);color:var(--accent2);border-color:rgba(139,92,246,0.3);">100% Free</span>
+      <span style="font-size:0.75rem;color:var(--text3);">by Nico</span>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button class="tab active" onclick="switchTab('prices')">📊 Live Prices</button>
+    <button class="tab" onclick="switchTab('dca')">📈 DCA Simulator</button>
+    <button class="tab" onclick="switchTab('pnl')">💰 P&L Calculator</button>
+    <button class="tab" onclick="switchTab('position')">🎯 Position Sizer</button>
+    <button class="tab" onclick="switchTab('portfolio')">💼 Portfolio</button>
+    <button class="tab" onclick="switchTab('donate')">☕ Donate</button>
+  </nav>
+
+  <!-- Tab 1: Live Prices -->
+  <div id="tab-prices" class="tab-content active">
+    <div class="card">
+      <h3><span class="icon">📊</span>Live Crypto Prices</h3>
+      <div id="price-grid" class="price-grid"><div class="loading"><div class="spinner"></div>Loading prices...</div></div>
+      <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--text3);">
+        Data from CoinGecko • Updates every 60s • Click any coin for details
+      </div>
+    </div>
+    <div class="card" id="coin-detail" style="display:none;">
+      <h3 id="coin-detail-title">Coin Details</h3>
+      <div class="stat-grid" id="coin-detail-stats"></div>
+    </div>
+  </div>
+
+  <!-- Tab 2: DCA Simulator -->
+  <div id="tab-dca" class="tab-content">
+    <div class="card">
+      <h3><span class="icon">📈</span>DCA (Dollar Cost Averaging) Simulator</h3>
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:16px;">
+        Compare DCA vs Lump Sum investing. See what happens when you invest regularly vs all at once.
+      </p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Coin</label>
+          <select id="dca-coin">
+            <option value="bitcoin">Bitcoin (BTC)</option>
+            <option value="ethereum">Ethereum (ETH)</option>
+            <option value="solana">Solana (SOL)</option>
+            <option value="cardano">Cardano (ADA)</option>
+            <option value="polkadot">Polkadot (DOT)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Investment per Period ($)</label>
+          <input type="number" id="dca-amount" value="100" min="1" step="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Frequency</label>
+          <select id="dca-frequency">
+            <option value="7">Weekly</option>
+            <option value="30" selected>Monthly</option>
+            <option value="14">Bi-weekly</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Time Period</label>
+          <select id="dca-period">
+            <option value="365">1 Year</option>
+            <option value="730">2 Years</option>
+            <option value="1095">3 Years</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="runDCASimulation()">🚀 Run Simulation</button>
+      <div id="dca-results" style="display:none;">
+        <div class="result-box">
+          <h4 style="margin-bottom:12px;color:var(--accent);">📊 Results</h4>
+          <div class="result-row"><span class="result-label">Total Invested</span><span class="result-value" id="dca-total-invested">-</span></div>
+          <div class="result-row"><span class="result-label">DCA Final Value</span><span class="result-value highlight" id="dca-final">-</span></div>
+          <div class="result-row"><span class="result-label">Lump Sum Final Value</span><span class="result-value" id="dca-lump">-</span></div>
+          <div class="result-row"><span class="result-label">DCA Profit/Loss</span><span class="result-value" id="dca-pnl">-</span></div>
+          <div class="result-row"><span class="result-label">Coins Accumulated (DCA)</span><span class="result-value" id="dca-coins">-</span></div>
+          <div class="result-row"><span class="result-label">Avg Purchase Price</span><span class="result-value" id="dca-avg">-</span></div>
+          <div class="result-row" style="background:rgba(59,130,246,0.05);border-radius:8px;padding:10px 16px;margin-top:8px;">
+            <span class="result-label" style="font-weight:700;">🏆 Winner</span>
+            <span class="result-value highlight" id="dca-winner">-</span>
+          </div>
+        </div>
+        <div class="chart-container"><canvas id="dca-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: P&L Calculator -->
+  <div id="tab-pnl" class="tab-content">
+    <div class="card">
+      <h3><span class="icon">💰</span>Profit / Loss Calculator</h3>
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:16px;">
+        Calculate your exact P&L including fees. Supports spot and leveraged positions.
+      </p>
+      <div class="form-row">
+        <div class="form-group"><label>Entry Price ($)</label><input type="number" id="pnl-entry" placeholder="e.g. 45000" step="any"></div>
+        <div class="form-group"><label>Exit Price ($)</label><input type="number" id="pnl-exit" placeholder="e.g. 52000" step="any"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Position Size ($)</label><input type="number" id="pnl-size" placeholder="e.g. 1000" step="any" value="1000"></div>
+        <div class="form-group"><label>Leverage</label><select id="pnl-leverage">
+          <option value="1">1x (Spot)</option><option value="2">2x</option><option value="3">3x</option>
+          <option value="5">5x</option><option value="10">10x</option><option value="20">20x</option>
+          <option value="50">50x</option><option value="100">100x</option>
+        </select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Entry Fee (%)</label><input type="number" id="pnl-fee-entry" value="0.1" step="0.01" min="0"></div>
+        <div class="form-group"><label>Exit Fee (%)</label><input type="number" id="pnl-fee-exit" value="0.1" step="0.01" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Direction</label><select id="pnl-direction"><option value="long">Long</option><option value="short">Short</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="calculatePnL()">📊 Calculate P&L</button>
+      <div id="pnl-results" style="display:none;">
+        <div class="result-box">
+          <div class="result-row"><span class="result-label">Entry Value</span><span class="result-value" id="pnl-entry-val">-</span></div>
+          <div class="result-row"><span class="result-label">Exit Value</span><span class="result-value" id="pnl-exit-val">-</span></div>
+          <div class="result-row"><span class="result-label">Total Fees</span><span class="result-value" style="color:var(--yellow)" id="pnl-fees">-</span></div>
+          <div class="result-row"><span class="result-label">Gross P&L</span><span class="result-value" id="pnl-gross">-</span></div>
+          <div class="result-row" style="background:rgba(59,130,246,0.05);border-radius:8px;padding:10px 16px;">
+            <span class="result-label" style="font-weight:700;">Net P&L</span>
+            <span class="result-value highlight" id="pnl-net">-</span>
+          </div>
+          <div class="result-row"><span class="result-label">ROI %</span><span class="result-value" id="pnl-roi">-</span></div>
+          <div class="result-row"><span class="result-label">Liquidation Price</span><span class="result-value" style="color:var(--red)" id="pnl-liq">-</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: Position Sizer -->
+  <div id="tab-position" class="tab-content">
+    <div class="card">
+      <h3><span class="icon">🎯</span>Position Size Calculator</h3>
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:16px;">
+        Calculate the right position size based on your risk tolerance. Never risk more than you can afford.
+      </p>
+      <div class="form-row">
+        <div class="form-group"><label>Account Balance ($)</label><input type="number" id="pos-balance" value="10000" step="any"></div>
+        <div class="form-group"><label>Risk % per Trade</label><input type="number" id="pos-risk" value="2" min="0.1" max="100" step="0.1"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Entry Price ($)</label><input type="number" id="pos-entry" placeholder="e.g. 45000" step="any"></div>
+        <div class="form-group"><label>Stop Loss Price ($)</label><input type="number" id="pos-stop" placeholder="e.g. 44000" step="any"></div>
+      </div>
+      <div class="form-group"><label>Leverage</label><select id="pos-leverage">
+        <option value="1">1x (Spot)</option><option value="2">2x</option><option value="3">3x</option>
+        <option value="5">5x</option><option value="10">10x</option><option value="20">20x</option>
+      </select></div>
+      <button class="btn btn-primary btn-block" onclick="calculatePosition()">🎯 Calculate Position</button>
+      <div id="pos-results" style="display:none;">
+        <div class="result-box">
+          <div class="result-row"><span class="result-label">Max Risk Amount ($)</span><span class="result-value" style="color:var(--red)" id="pos-risk-amount">-</span></div>
+          <div class="result-row"><span class="result-label">Stop Loss Distance (%)</span><span class="result-value" id="pos-sl-pct">-</span></div>
+          <div class="result-row"><span class="result-label">Position Size (Margin)</span><span class="result-value highlight" id="pos-margin">-</span></div>
+          <div class="result-row"><span class="result-label">Position Size (Total)</span><span class="result-value" id="pos-total">-</span></div>
+          <div class="result-row"><span class="result-label">Quantity to Buy</span><span class="result-value" id="pos-qty">-</span></div>
+          <div class="result-row"><span class="result-label">Take Profit @ 2:1 R/R</span><span class="result-value" style="color:var(--green)" id="pos-tp">-</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 5: Portfolio Tracker -->
+  <div id="tab-portfolio" class="tab-content">
+    <div class="card">
+      <h3><span class="icon">💼</span>Portfolio Tracker</h3>
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:16px;">
+        Track your holdings. Data is saved locally in your browser — nothing is ever sent anywhere.
+      </p>
+      <div class="form-row" style="grid-template-columns: 2fr 1fr 1fr auto;">
+        <div class="form-group"><label>Coin ID</label>
+          <select id="pf-coin">
+            <option value="bitcoin">Bitcoin (BTC)</option><option value="ethereum">Ethereum (ETH)</option>
+            <option value="solana">Solana (SOL)</option><option value="cardano">Cardano (ADA)</option>
+            <option value="polkadot">DOT</option><option value="chainlink">LINK</option>
+            <option value="avalanche-2">AVAX</option><option value="matic-network">MATIC</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Amount</label><input type="number" id="pf-amount" placeholder="0.5" step="any"></div>
+        <div class="form-group"><label>Buy Price ($)</label><input type="number" id="pf-price" placeholder="45000" step="any"></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;"><button class="btn btn-primary" onclick="addToPortfolio()" style="height:42px;">+ Add</button></div>
+      </div>
+      <div id="portfolio-list"></div>
+      <div id="portfolio-total" class="result-box" style="display:none;">
+        <div class="result-row"><span class="result-label">Total Invested</span><span class="result-value" id="pf-invested">-</span></div>
+        <div class="result-row"><span class="result-label">Current Value</span><span class="result-value highlight" id="pf-current">-</span></div>
+        <div class="result-row"><span class="result-label">Total P&L</span><span class="result-value" id="pf-pnl">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 6: Donate -->
+  <div id="tab-donate" class="tab-content">
+    <div class="donate-card">
+      <div class="coffee-emoji">☕</div>
+      <h2>Buy Me a Coffee</h2>
+      <p>If these tools helped you, consider buying me a coffee!<br>Every donation motivates me to build more free tools.</p>
+      <div class="wallet-box" id="wallet-address">
+        0xD404AE6B45Cae3D453D4408de99eC489Ce0fc18e
+        <button class="copy-btn" onclick="copyWallet()">📋 Copy</button>
+      </div>
+      <div class="networks">
+        <span class="network-tag">🔷 Ethereum</span>
+        <span class="network-tag">🟣 Polygon</span>
+        <span class="network-tag">🔶 BNB Chain</span>
+        <span class="network-tag">🔵 Arbitrum</span>
+        <span class="network-tag">🟢 Optimism</span>
+        <span class="network-tag">⚡ Base</span>
+      </div>
+      <p style="margin-top:16px;font-size:0.8rem;color:var(--text3);">
+        Accepts: ETH, MATIC, USDC, USDT, and any ERC-20 token
+      </p>
+    </div>
+    <div class="card" style="text-align:center;margin-top:16px;">
+      <h3>🚀 Want More?</h3>
+      <p style="color:var(--text2);margin-bottom:12px;">Premium features coming soon: API access, advanced backtesting, alerts, and more.</p>
+      <p style="font-size:0.8rem;color:var(--text3);">Built with ❤️ by Nico • 100% client-side • No data collection</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>CryptoKit Pro — Free open-source crypto tools • <a href="https://github.com" target="_blank">GitHub</a></p>
+    <p style="margin-top:4px;">Built by Nico • No tracking • No ads • Just useful tools</p>
+  </footer>
+</div>
+
+<script>
+// ============ STATE ============
+let priceData = {};
+let priceCache = null;
+let priceCacheTime = 0;
+const CACHE_DURATION = 60000; // 1 min
+
+// ============ TABS ============
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'prices') fetchPrices();
+  if (name === 'portfolio') renderPortfolio();
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2300);
+}
+
+// ============ PRICE FETCHING ============
+async function fetchPrices(force = false) {
+  const now = Date.now();
+  if (!force && priceCache && (now - priceCacheTime) < CACHE_DURATION) {
+    renderPriceGrid(priceCache);
+    return;
+  }
+  
+  const grid = document.getElementById('price-grid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading prices...</div>';
+  
+  try {
+    const resp = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h');
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    priceCache = data;
+    priceCacheTime = now;
+    data.forEach(c => { priceData[c.id] = { price: c.current_price, change24h: c.price_change_percentage_24h, name: c.name, symbol: c.symbol, image: c.image, marketCap: c.market_cap, volume: c.total_volume, high24h: c.high_24h, low24h: c.low_24h, ath: c.ath }; });
+    renderPriceGrid(data);
+  } catch(e) {
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);">⚠️ Could not load prices. Using cache if available. <button class="btn btn-secondary btn-sm" onclick="fetchPrices(true)">Retry</button></div>';
+    if (priceCache) renderPriceGrid(priceCache);
+  }
+}
+
+function renderPriceGrid(data) {
+  const grid = document.getElementById('price-grid');
+  grid.innerHTML = data.slice(0, 30).map(c => {
+    const change = c.price_change_percentage_24h;
+    const changeClass = change >= 0 ? 'up' : 'down';
+    const changeSign = change >= 0 ? '+' : '';
+    return `
+      <div class="price-item" onclick="showCoinDetail('${c.id}')" title="Click for details">
+        <img src="${c.image}" alt="${c.symbol}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:6px;">
+        <span class="symbol">${c.symbol.toUpperCase()}</span>
+        <div class="name">${c.name}</div>
+        <div class="price">$${c.current_price < 0.01 ? c.current_price.toFixed(6) : c.current_price < 1 ? c.current_price.toFixed(4) : c.current_price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+        <div class="change ${changeClass}">${changeSign}${change?.toFixed(2) || '0.00'}%</div>
+      </div>`;
+  }).join('');
+}
+
+function showCoinDetail(id) {
+  const coin = priceData[id];
+  if (!coin) return;
+  const detail = document.getElementById('coin-detail');
+  const title = document.getElementById('coin-detail-title');
+  const stats = document.getElementById('coin-detail-stats');
+  detail.style.display = 'block';
+  title.innerHTML = `<img src="${coin.image}" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:8px;">${coin.name} (${coin.symbol.toUpperCase()})`;
+  
+  const ch = coin.change24h || 0;
+  const cap = coin.marketCap ? '$' + (coin.marketCap / 1e9).toFixed(2) + 'B' : '-';
+  const vol = coin.volume ? '$' + (coin.volume / 1e9).toFixed(2) + 'B' : '-';
+  
+  stats.innerHTML = `
+    <div class="stat-item"><div class="stat-value">$${coin.price < 0.01 ? coin.price.toFixed(6) : coin.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div><div class="stat-label">Current Price</div></div>
+    <div class="stat-item"><div class="stat-value" style="color:${ch>=0?'var(--green)':'var(--red)'}">${ch>=0?'+':''}${ch.toFixed(2)}%</div><div class="stat-label">24h Change</div></div>
+    <div class="stat-item"><div class="stat-value">$${coin.high24h?.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})||'-'}</div><div class="stat-label">24h High</div></div>
+    <div class="stat-item"><div class="stat-value">$${coin.low24h?.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})||'-'}</div><div class="stat-label">24h Low</div></div>
+    <div class="stat-item"><div class="stat-value">${cap}</div><div class="stat-label">Market Cap</div></div>
+    <div class="stat-item"><div class="stat-value">${vol}</div><div class="stat-label">24h Volume</div></div>
+    <div class="stat-item"><div class="stat-value">$${coin.ath?.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})||'-'}</div><div class="stat-label">All-Time High</div></div>
+  `;
+  detail.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ DCA SIMULATOR ============
+async function runDCASimulation() {
+  const coinId = document.getElementById('dca-coin').value;
+  const amount = parseFloat(document.getElementById('dca-amount').value);
+  const freq = parseInt(document.getElementById('dca-frequency').value);
+  const period = parseInt(document.getElementById('dca-period').value);
+  
+  if (!amount || amount <= 0) { showToast('Enter a valid investment amount'); return; }
+  
+  const results = document.getElementById('dca-results');
+  results.style.display = 'block';
+  document.getElementById('dca-final').textContent = 'Calculating...';
+  
+  try {
+    // Fetch historical prices from CoinGecko
+    const days = Math.min(period + 5, 365*3);
+    const resp = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`);
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    const prices = data.prices;
+    
+    if (!prices || prices.length < 2) {
+      document.getElementById('dca-final').textContent = 'Not enough data';
+      return;
+    }
+    
+    // Sort prices by date
+    prices.sort((a, b) => a[0] - b[0]);
+    
+    // Filter to the desired period
+    const periodMs = period * 24 * 60 * 60 * 1000;
+    const endTime = prices[prices.length - 1][0];
+    const startTime = endTime - periodMs;
+    const filteredPrices = prices.filter(p => p[0] >= startTime);
+    
+    if (filteredPrices.length < 2) {
+      document.getElementById('dca-final').textContent = 'Not enough data for this period';
+      return;
+    }
+    
+    // DCA simulation
+    const frequencyMs = freq * 24 * 60 * 60 * 1000;
+    let dcaTotalCoins = 0;
+    let dcaTotalInvested = 0;
+    let currentTime = filteredPrices[0][0];
+    const dcaPoints = [];
+    
+    while (currentTime <= filteredPrices[filteredPrices.length - 1][0]) {
+      // Find closest price
+      let closestPrice = filteredPrices[0][1];
+      let minDiff = Infinity;
+      for (const [t, p] of filteredPrices) {
+        const diff = Math.abs(t - currentTime);
+        if (diff < minDiff) { minDiff = diff; closestPrice = p; }
+      }
+      
+      const coinsBought = amount / closestPrice;
+      dcaTotalCoins += coinsBought;
+      dcaTotalInvested += amount;
+      dcaPoints.push({ time: currentTime, totalInvested: dcaTotalInvested, totalValue: dcaTotalCoins * closestPrice, coins: dcaTotalCoins, price: closestPrice });
+      currentTime += frequencyMs;
+    }
+    
+    // Lump sum simulation
+    const startPrice = filteredPrices[0][1];
+    const endPrice = filteredPrices[filteredPrices.length - 1][1];
+    const lumpCoins = dcaTotalInvested / startPrice;
+    const lumpFinal = lumpCoins * endPrice;
+    
+    const dcaFinalValue = dcaTotalCoins * endPrice;
+    const dcaPnl = dcaFinalValue - dcaTotalInvested;
+    const dcaPnlPct = ((dcaFinalValue / dcaTotalInvested) - 1) * 100;
+    const lumpPnl = lumpFinal - dcaTotalInvested;
+    const lumpPnlPct = ((lumpFinal / dcaTotalInvested) - 1) * 100;
+    const avgPrice = dcaTotalInvested / dcaTotalCoins;
+    
+    document.getElementById('dca-total-invested').textContent = '$' + dcaTotalInvested.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('dca-final').textContent = '$' + dcaFinalValue.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ` (${dcaPnlPct>=0?'+':''}${dcaPnlPct.toFixed(2)}%)`;
+    document.getElementById('dca-lump').textContent = '$' + lumpFinal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ` (${lumpPnlPct>=0?'+':''}${lumpPnlPct.toFixed(2)}%)`;
+    
+    const pnlEl = document.getElementById('dca-pnl');
+    pnlEl.textContent = (dcaPnl >= 0 ? '+' : '') + '$' + dcaPnl.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    pnlEl.className = 'result-value ' + (dcaPnl >= 0 ? 'profit' : 'loss');
+    
+    document.getElementById('dca-coins').textContent = dcaTotalCoins.toFixed(6);
+    document.getElementById('dca-avg').textContent = '$' + avgPrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:6});
+    
+    const winnerEl = document.getElementById('dca-winner');
+    if (dcaFinalValue > lumpFinal) {
+      const diff = dcaFinalValue - lumpFinal;
+      winnerEl.textContent = `DCA wins by $${diff.toLocaleString('en-US',{minimumFractionDigits:2})}`;
+      winnerEl.style.color = 'var(--green)';
+    } else if (lumpFinal > dcaFinalValue) {
+      const diff = lumpFinal - dcaFinalValue;
+      winnerEl.textContent = `Lump Sum wins by $${diff.toLocaleString('en-US',{minimumFractionDigits:2})}`;
+      winnerEl.style.color = 'var(--accent3)';
+    } else {
+      winnerEl.textContent = 'Tie!';
+      winnerEl.style.color = 'var(--yellow)';
+    }
+    
+    // Draw chart
+    drawDCAChart(dcaPoints, filteredPrices, lumpFinal, dcaTotalInvested);
+    
+  } catch(e) {
+    document.getElementById('dca-final').textContent = 'Error: ' + e.message;
+    console.error(e);
+  }
+}
+
+function drawDCAChart(dcaPoints, allPrices, lumpFinal, totalInvested) {
+  const canvas = document.getElementById('dca-chart');
+  const ctx = canvas.getContext('2d');
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth;
+  canvas.height = 250;
+  
+  const w = canvas.width, h = canvas.height;
+  const pad = { top: 20, right: 20, bottom: 40, left: 60 };
+  const pw = w - pad.left - pad.right;
+  const ph = h - pad.top - pad.bottom;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  // Background
+  ctx.fillStyle = '#1a1f2e';
+  ctx.fillRect(0, 0, w, h);
+  
+  // Find min/max
+  let minVal = Infinity, maxVal = -Infinity;
+  dcaPoints.forEach(p => { if (p.totalValue < minVal) minVal = p.totalValue; if (p.totalValue > maxVal) maxVal = p.totalValue; });
+  allPrices.forEach(p => { if (p[1] * (totalInvested / allPrices[0][1]) > maxVal) maxVal = p[1] * (totalInvested / allPrices[0][1]); });
+  const range = maxVal - minVal || 1;
+  minVal -= range * 0.05;
+  maxVal += range * 0.05;
+  
+  function x(val) { return pad.left + ((val - dcaPoints[0].time) / (dcaPoints[dcaPoints.length-1].time - dcaPoints[0].time)) * pw; }
+  function y(val) { return pad.top + ph - ((val - minVal) / (maxVal - minVal)) * ph; }
+  
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const gy = pad.top + (ph * i / 5);
+    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w - pad.right, gy); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
+    const val = maxVal - ((maxVal - minVal) * i / 5);
+    ctx.fillText('$' + val.toFixed(0), 4, gy + 3);
+  }
+  
+  // Lump sum line
+  ctx.strokeStyle = 'rgba(139,92,246,0.5)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x(dcaPoints[0].time), y(lumpFinal));
+  ctx.lineTo(x(dcaPoints[dcaPoints.length-1].time), y(lumpFinal));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Lump sum label
+  ctx.fillStyle = '#8b5cf6';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('Lump Sum', x(dcaPoints[0].time) + 5, y(lumpFinal) - 5);
+  
+  // DCA line - gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ph);
+  grad.addColorStop(0, 'rgba(59,130,246,0.3)');
+  grad.addColorStop(1, 'rgba(59,130,246,0.02)');
+  
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x(dcaPoints[0].time), y(dcaPoints[0].totalValue));
+  for (let i = 1; i < dcaPoints.length; i++) {
+    ctx.lineTo(x(dcaPoints[i].time), y(dcaPoints[i].totalValue));
+  }
+  ctx.stroke();
+  
+  // Fill under DCA curve
+  ctx.lineTo(x(dcaPoints[dcaPoints.length-1].time), y(minVal));
+  ctx.lineTo(x(dcaPoints[0].time), y(minVal));
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  
+  // DCA label
+  ctx.fillStyle = '#3b82f6';
+  ctx.font = 'bold 10px sans-serif';
+  const lastPoint = dcaPoints[dcaPoints.length - 1];
+  ctx.fillText('DCA', x(lastPoint.time) - 30, y(lastPoint.totalValue) - 8);
+  
+  // X axis labels
+  ctx.fillStyle = '#64748b';
+  ctx.font = '9px sans-serif';
+  const steps = 6;
+  for (let i = 0; i <= steps; i++) {
+    const t = dcaPoints[0].time + (dcaPoints[dcaPoints.length-1].time - dcaPoints[0].time) * i / steps;
+    const date = new Date(t);
+    const label = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    ctx.fillText(label, x(t) - 20, h - pad.bottom + 15);
+  }
+  
+  // Legend
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '9px sans-serif';
+  ctx.fillText('DCA Entry Points: ' + dcaPoints.length, pad.left, pad.top - 2);
+}
+
+// ============ P&L CALCULATOR ============
+function calculatePnL() {
+  const entry = parseFloat(document.getElementById('pnl-entry').value);
+  const exit = parseFloat(document.getElementById('pnl-exit').value);
+  const size = parseFloat(document.getElementById('pnl-size').value);
+  const leverage = parseFloat(document.getElementById('pnl-leverage').value);
+  const feeEntry = parseFloat(document.getElementById('pnl-fee-entry').value) / 100;
+  const feeExit = parseFloat(document.getElementById('pnl-fee-exit').value) / 100;
+  const direction = document.getElementById('pnl-direction').value;
+  
+  if (!entry || !exit || !size) { showToast('Fill all price fields'); return; }
+  
+  const results = document.getElementById('pnl-results');
+  results.style.display = 'block';
+  
+  const totalSize = size * leverage;
+  const entryFeeAmount = size * feeEntry;
+  const exitFeeAmount = size * feeExit;
+  const totalFees = entryFeeAmount + exitFeeAmount;
+  
+  let grossPnl, pctChange;
+  if (direction === 'long') {
+    pctChange = ((exit - entry) / entry) * 100 * leverage;
+    grossPnl = size * ((exit - entry) / entry) * leverage;
+  } else {
+    pctChange = ((entry - exit) / entry) * 100 * leverage;
+    grossPnl = size * ((entry - exit) / entry) * leverage;
+  }
+  
+  const netPnl = grossPnl - totalFees;
+  const roi = (netPnl / size) * 100;
+  
+  // Liquidation price (simplified)
+  let liqPrice;
+  if (direction === 'long') {
+    liqPrice = entry * (1 - (1 / leverage) + 0.005);
+  } else {
+    liqPrice = entry * (1 + (1 / leverage) - 0.005);
+  }
+  
+  document.getElementById('pnl-entry-val').textContent = '$' + size.toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pnl-exit-val').textContent = '$' + (size + grossPnl).toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pnl-fees').textContent = '$' + totalFees.toLocaleString('en-US', {minimumFractionDigits:2});
+  
+  const grossEl = document.getElementById('pnl-gross');
+  grossEl.textContent = (grossPnl >= 0 ? '+' : '') + '$' + grossPnl.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  grossEl.className = 'result-value ' + (grossPnl >= 0 ? 'profit' : 'loss');
+  
+  const netEl = document.getElementById('pnl-net');
+  netEl.textContent = (netPnl >= 0 ? '+' : '') + '$' + netPnl.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  netEl.className = 'result-value highlight ' + (netPnl >= 0 ? '' : '');
+  
+  const roiEl = document.getElementById('pnl-roi');
+  roiEl.textContent = (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%';
+  roiEl.className = 'result-value ' + (roi >= 0 ? 'profit' : 'loss');
+  
+  document.getElementById('pnl-liq').textContent = '$' + liqPrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ============ POSITION SIZER ============
+function calculatePosition() {
+  const balance = parseFloat(document.getElementById('pos-balance').value);
+  const riskPct = parseFloat(document.getElementById('pos-risk').value);
+  const entry = parseFloat(document.getElementById('pos-entry').value);
+  const stop = parseFloat(document.getElementById('pos-stop').value);
+  const leverage = parseFloat(document.getElementById('pos-leverage').value);
+  
+  if (!balance || !entry || !stop) { showToast('Fill all fields'); return; }
+  if (stop >= entry && stop <= entry) { showToast('Stop loss must differ from entry'); return; }
+  
+  const results = document.getElementById('pos-results');
+  results.style.display = 'block';
+  
+  const riskAmount = balance * (riskPct / 100);
+  const slDistance = Math.abs((stop - entry) / entry) * 100;
+  const positionMargin = riskAmount / (slDistance / 100);
+  const positionTotal = positionMargin * leverage;
+  const quantity = positionTotal / entry;
+  const tpPrice = entry + (entry - stop) * 2; // 2:1 R/R
+  
+  if (stop > entry && leverage > 1) {
+    // Short trade - adjust
+  }
+  
+  document.getElementById('pos-risk-amount').textContent = '$' + riskAmount.toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pos-sl-pct').textContent = slDistance.toFixed(2) + '%';
+  document.getElementById('pos-margin').textContent = '$' + positionMargin.toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pos-total').textContent = '$' + positionTotal.toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pos-qty').textContent = quantity.toFixed(6);
+  document.getElementById('pos-tp').textContent = '$' + tpPrice.toLocaleString('en-US', {minimumFractionDigits:2});
+}
+
+// ============ PORTFOLIO TRACKER ============
+function getPortfolio() {
+  try { return JSON.parse(localStorage.getItem('cryptokit_portfolio') || '[]'); }
+  catch(e) { return []; }
+}
+
+function savePortfolio(pf) {
+  localStorage.setItem('cryptokit_portfolio', JSON.stringify(pf));
+}
+
+function addToPortfolio() {
+  const coinId = document.getElementById('pf-coin').value;
+  const coinName = document.getElementById('pf-coin').selectedOptions[0].text;
+  const amount = parseFloat(document.getElementById('pf-amount').value);
+  const buyPrice = parseFloat(document.getElementById('pf-price').value);
+  
+  if (!amount || amount <= 0 || !buyPrice || buyPrice <= 0) {
+    showToast('Enter valid amount and price'); return;
+  }
+  
+  const pf = getPortfolio();
+  pf.push({ id: coinId, name: coinName, amount, buyPrice, addedAt: Date.now() });
+  savePortfolio(pf);
+  document.getElementById('pf-amount').value = '';
+  document.getElementById('pf-price').value = '';
+  renderPortfolio();
+  showToast('✅ Added to portfolio!');
+}
+
+function removeFromPortfolio(index) {
+  const pf = getPortfolio();
+  pf.splice(index, 1);
+  savePortfolio(pf);
+  renderPortfolio();
+}
+
+async function renderPortfolio() {
+  const list = document.getElementById('portfolio-list');
+  const total = document.getElementById('portfolio-total');
+  const pf = getPortfolio();
+  
+  if (pf.length === 0) {
+    list.innerHTML = '<p style="text-align:center;padding:32px;color:var(--text3);">Your portfolio is empty. Add some coins above! 📝</p>';
+    total.style.display = 'none';
+    return;
+  }
+  
+  total.style.display = 'block';
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Fetching current prices...</div>';
+  
+  let totalInvested = 0;
+  let totalCurrent = 0;
+  let rows = '';
+  
+  for (let i = 0; i < pf.length; i++) {
+    const item = pf[i];
+    totalInvested += item.amount * item.buyPrice;
+    let currentPrice = item.buyPrice; // fallback
+    
+    try {
+      // Check cache first
+      if (priceData[item.id]) {
+        currentPrice = priceData[item.id].price;
+      } else {
+        const resp = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${item.id}&vs_currencies=usd`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data[item.id]) currentPrice = data[item.id].usd;
+        }
+      }
+    } catch(e) {}
+    
+    const currentValue = item.amount * currentPrice;
+    totalCurrent += currentValue;
+    const pnl = currentValue - (item.amount * item.buyPrice);
+    const pnlPct = ((currentValue / (item.amount * item.buyPrice)) - 1) * 100;
+    
+    rows += `
+      <div class="portfolio-coin">
+        <div class="coin-info">
+          <div>
+            <div class="coin-symbol">${item.name.split('(')[0].trim()}</div>
+            <div class="coin-amount">${item.amount} @ $${item.buyPrice.toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="coin-value">
+          <div class="usd">$${currentValue.toLocaleString('en-US', {minimumFractionDigits:2})}</div>
+          <div class="pnl" style="color:${pnl>=0?'var(--green)':'var(--red)'}">
+            ${pnl>=0?'+':''}$${pnl.toFixed(2)} (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)
+          </div>
+        </div>
+        <button class="delete-btn" onclick="removeFromPortfolio(${i})">🗑️</button>
+      </div>`;
+  }
+  
+  list.innerHTML = rows;
+  
+  const totalPnl = totalCurrent - totalInvested;
+  const totalPnlPct = totalInvested > 0 ? ((totalCurrent / totalInvested) - 1) * 100 : 0;
+  
+  document.getElementById('pf-invested').textContent = '$' + totalInvested.toLocaleString('en-US', {minimumFractionDigits:2});
+  document.getElementById('pf-current').textContent = '$' + totalCurrent.toLocaleString('en-US', {minimumFractionDigits:2});
+  
+  const pnlEl = document.getElementById('pf-pnl');
+  pnlEl.textContent = (totalPnl>=0?'+':'') + '$' + totalPnl.toLocaleString('en-US', {minimumFractionDigits:2}) + ` (${totalPnlPct>=0?'+':''}${totalPnlPct.toFixed(2)}%)`;
+  pnlEl.className = 'result-value ' + (totalPnl >= 0 ? 'profit' : 'loss');
+}
+
+// ============ DONATE ============
+function copyWallet() {
+  const addr = document.getElementById('wallet-address').textContent.trim();
+  navigator.clipboard.writeText(addr).then(() => {
+    showToast('📋 Wallet address copied!');
+  }).catch(() => {
+    showToast('❌ Copy failed. Please select and copy manually.');
+  });
+}
+
+// ============ INIT ============
+fetchPrices();
+
+// Auto-refresh prices every 60 seconds
+setInterval(() => fetchPrices(true), 60000);
+
+// Keyboard shortcut for tab switching
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    const tabs = ['prices','dca','pnl','position','portfolio','donate'];
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= 6) {
+      e.preventDefault();
+      switchTab(tabs[num - 1]);
+      document.querySelectorAll('.tab')[num - 1].classList.add('active');
+    }
+  }
+});
+</script>
+
+</body>
+</html>

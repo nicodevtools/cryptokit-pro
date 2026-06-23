@@ -3,8 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CryptoKit Pro — Free Crypto Tools by Nico</title>
-<meta name="description" content="Free crypto tools: Live Prices, DCA Simulator, P&L Calculator, Position Sizer, Portfolio Tracker. Built with ❤️ by Nico.">
+<title>CryptoKit Pro — Free Crypto Profit Calculator, DCA Simulator & Position Sizer</title>
+<meta name="description" content="Free crypto tools: DCA Simulator, P&L Calculator, Position Size Calculator, Portfolio Tracker, and Live Prices. 100% free, no ads, no tracking. Built with ❤️ by Nico.">
+<meta name="keywords" content="free crypto profit calculator, crypto DCA simulator, position size calculator crypto, P&L calculator trading, dollar cost averaging calculator, free portfolio tracker, live crypto prices, open source crypto toolkit, free crypto tools">
+<meta name="author" content="Nico">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nicodevtools.github.io/cryptokit-pro/">
+<meta property="og:title" content="CryptoKit Pro — Free Crypto Profit Calculator & DCA Simulator">
+<meta property="og:description" content="6 free crypto tools in one place: DCA Simulator, P&L Calculator, Position Sizer, Portfolio Tracker, and Live Prices. No ads, no tracking, 100% client-side.">
+<meta property="og:image" content="https://nicodevtools.github.io/cryptokit-pro/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="CryptoKit Pro">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://nicodevtools.github.io/cryptokit-pro/">
+<meta name="twitter:title" content="CryptoKit Pro — Free Crypto Tools">
+<meta name="twitter:description" content="Free DCA Simulator, P&L Calculator, Position Sizer & Portfolio Tracker. No ads, no tracking.">
+<meta name="twitter:image" content="https://nicodevtools.github.io/cryptokit-pro/og-image.png">
 <style>
 :root {
   --bg: #0a0e17;
@@ -493,6 +514,15 @@ input[type="range"]::-webkit-slider-thumb {
       <h3>🚀 Want More?</h3>
       <p style="color:var(--text2);margin-bottom:12px;">Premium features coming soon: API access, advanced backtesting, alerts, and more.</p>
       <p style="font-size:0.8rem;color:var(--text3);">Built with ❤️ by Nico • 100% client-side • No data collection</p>
+    </div>
+    <div class="card" style="text-align:center;margin-top:16px;">
+      <h3>📣 Share CryptoKit Pro</h3>
+      <p style="color:var(--text2);margin-bottom:16px;">Help other traders find these free tools!</p>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+        <a href="https://twitter.com/intent/tweet?text=%F0%9F%A7%B0%206%20free%20crypto%20tools%3A%0A%F0%9F%93%8A%20DCA%20Simulator%20%7C%20%F0%9F%A7%AE%20P%26L%20Calc%20%7C%20%F0%9F%93%90%20Position%20Sizer%0A%F0%9F%93%8B%20Portfolio%20Tracker%20%7C%20%F0%9F%92%B9%20Live%20Prices%20%7C%20%F0%9F%94%90%20Wallet%20Gen%0A%0ANo%20ads.%20No%20tracking.%20100%25%20free.%0A%0A%F0%9F%94%97%20https%3A%2F%2Fnicodevtools.github.io%2Fcryptokit-pro%2F%0A%0A%23Crypto%20%23Trading%20%23DeFi" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#1DA1F2;color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:13px;">𝕏 Tweet</a>
+        <a href="https://t.me/share/url?url=https%3A%2F%2Fnicodevtools.github.io%2Fcryptokit-pro%2F&text=%F0%9F%A7%B0%20CryptoKit%20Pro%20-%206%20free%20crypto%20tools%2C%20no%20ads%2C%20no%20tracking" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#26A5E4;color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:13px;">📱 Telegram</a>
+        <button onclick="copyCryptoKitTweet()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;">📋 Copy Tweet</button>
+      </div>
     </div>
   </div>
 
@@ -1010,6 +1040,15 @@ function copyWallet() {
     showToast('📋 Wallet address copied!');
   }).catch(() => {
     showToast('❌ Copy failed. Please select and copy manually.');
+  });
+}
+
+function copyCryptoKitTweet() {
+  const tweet = '🧰 6 free crypto tools:\n📊 DCA Simulator | 🧮 P&L Calc | 📐 Position Sizer\n📋 Portfolio Tracker | 💹 Live Prices | 🔐 Wallet Gen\n\nNo ads. No tracking. 100% free.\n\n🔗 https://nicodevtools.github.io/cryptokit-pro/\n\n#Crypto #Trading #DeFi';
+  navigator.clipboard.writeText(tweet).then(() => {
+    showToast('📋 Tweet copied! Paste it on Twitter/X 🎯');
+  }).catch(() => {
+    showToast('❌ Copy failed.');
   });
 }
 
